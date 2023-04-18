@@ -1,3 +1,3 @@
 # SOME MINOR PYTHON PROJS
 
-## Ecourage DiscordBot
+## Encourage DiscordBot
