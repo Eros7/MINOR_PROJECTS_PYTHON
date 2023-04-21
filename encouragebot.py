@@ -3,7 +3,7 @@ import os
 import requests
 import json
 import random
-from replit import db
+from replit import db #from replit.com
 
 intents=discord.Intents.default()
 intents.message_content=True
