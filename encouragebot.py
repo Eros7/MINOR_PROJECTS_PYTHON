@@ -3,7 +3,10 @@ import os
 import requests
 import json
 import random
-from replit import db #from replit.com
+from replit import db
+from keep_alive import keep_alive
+
+
 
 intents=discord.Intents.default()
 intents.message_content=True
@@ -12,6 +15,10 @@ client=discord.Client(intents=intents)
 sadwords=['depressed','sad','unhappy','angry','tired','wary']
 
 starter_encouragements=['Cheer up','Hang in there',"You're a great person"]
+
+if "responding" not in db.keys():
+  db["responding"]=True
+  
 
 def get_quote():
   response=requests.get("https://zenquotes.io/api/random")
@@ -54,12 +61,13 @@ async def on_message(message):
   if msg.startswith('$inspire'):
     await message.channel.send(get_quote())
 
-  options=starter_encouragements
-  if "encouragements" in db.keys():
-    options = options.extend(db["encouragements"])
-  
-  if any(word in msg for word in sadwords):
-    await message.channel.send(random.choice(options))
+  if db["responding"]:
+    options=starter_encouragements
+    if "encouragements" in db.keys():
+      options = options+list(db["encouragements"])
+    
+    if any(word in msg for word in sadwords):
+      await message.channel.send(random.choice(options))
 
   if msg.startswith("$new"):
     encouraging_message=msg.split("$new ",1)[1]
@@ -73,6 +81,22 @@ async def on_message(message):
       delete_encouragements(index)
       encouragements=db["encouragements"]
       await message.channel.send(encouragements)
-  
+
+  if msg.startswith("$list"):
+    encouragements=[]
+    if "encouragements" in db.keys():
+      encouragements=db["encouragements"]
+    await message.channel.send(encouragements)
+
+  if msg.startswith("$responding"):
+    value=msg.split("$responding ",1)[1]
+    if value.lower() =="true":
+      db["responding"]=True
+      await message.channel.send("Responding in ON")
+    else:
+      db["responding"]=False
+      await message.channel.send("Responding in OFF")
+      
+keep_alive()
 client.run(os.environ['TOKEN'])
 
